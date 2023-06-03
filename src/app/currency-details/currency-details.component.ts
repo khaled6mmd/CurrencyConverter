@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CurrencyService } from '../services/currency.service';
-import { DatePipe } from '@angular/common';
+import { Observable, forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-currency-details',
@@ -9,13 +9,12 @@ import { DatePipe } from '@angular/common';
   styleUrls: ['./currency-details.component.css']
 })
 export class CurrencyDetailsComponent implements OnInit {
-  fromCurrency: any;
-  toCurrency: any;
+  fromCurrency: string;
+  toCurrency: string;
   toCurrencyFullName: string;
-  currencies: string[] = ['USD', 'EUR', 'GBP']; // Replace with your currency list
   historicalData: any[] = [];
 
-  colorScheme: any = {
+  colorScheme: {domain: string[]} = {
     domain: ['#5AA454', '#A10A28', '#C7B42C', '#AAAAAA']
   };
   chartOptions: { chart: { type: string; }; title: { text: string; }; xAxis: {}; yAxis: {}; series: { name: string; data: any[]; }[]; }
@@ -23,21 +22,17 @@ export class CurrencyDetailsComponent implements OnInit {
 
   ngOnInit(): void {
     this.route.queryParamMap.subscribe(params => {
-      this.fromCurrency = params.get('from');
-      this.toCurrency = params.get('to');
-      this.currencyService.getCurrencyFullName(this.toCurrency).subscribe(fullName => {
+      this.fromCurrency = params.get('from') ?? '';
+      this.toCurrency = params.get('to') ?? '';
+      this.currencyService.getCurrencyFullName(this.toCurrency? this.toCurrency: '').subscribe(fullName => {
         this.toCurrencyFullName = fullName;
       });
-      const startDate = new Date('2023-05-01');
-      const endDate = new Date('2023-05-3');
-  
-      this.fetchHistoricalData(startDate, endDate);    });
-  }
-
-
-  convert(): void {
-    // Perform the conversion logic and update the details based on the selected currencies and other parameters
-    // ...
+      const startDate = new Date();
+      startDate.setFullYear(startDate.getFullYear() - 1); // Subtract 1 year from the current date
+      startDate.setDate(1); // Set the day to the first day of the month
+      const endDate = new Date();
+      this.fetchMonthlyHistoricalData(startDate, endDate);
+    });
   }
 
   getFullName(currency: string): string {
@@ -45,45 +40,93 @@ export class CurrencyDetailsComponent implements OnInit {
     return 'Full Name'; // Placeholder value
   }
 
-  fetchHistoricalData(startDate: Date, endDate: Date): void {
+  fetchMonthlyHistoricalData(startDate: Date, endDate: Date): void {
     const baseCurrency = 'EUR';
-    const symbols = ['USD'];
+    const symbols: string[] = [this.toCurrency];
+    
+    const dateRange = this.getMonthlyDateRange(startDate, endDate);
+    const requests: Observable<any>[] = [];
+    
+    dateRange.forEach((date) => {
+      const formattedDate = this.formatDate(date);
+      const lastDayOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+      const request = this.currencyService.getHistoricalData(formattedDate, baseCurrency, symbols);
+      requests.push(request);
   
+      if (date.getTime() !== lastDayOfMonth.getTime()) {
+        requests.push(this.currencyService.getHistoricalData(this.formatDate(lastDayOfMonth), baseCurrency, symbols));
+      }
+    });
+    
+    forkJoin(requests).subscribe({
+      next: (responses: any[]) => {
+        const historicalRates = responses
+          .filter((response) => response.success)
+          .map((response) => {
+            const rate = response.rates[this.toCurrency? this.toCurrency : ''];
+            const formattedDate = response.date;
+            return {
+              name: formattedDate,
+              value: rate,
+            };
+          });
+    
+        const historicalData: any[] = [
+          {
+            name: this.toCurrency,
+            series: historicalRates.reverse()
+          },
+        ];
+    
+        this.historicalData = historicalData;
+      },
+      error: (error) => {
+        console.error('Error fetching historical data:', error);
+      },
+      complete: () => {
+        // Optional complete callback
+      },
+    });
+  }
+  
+  getMonthlyDateRange(startDate: Date, endDate: Date): Date[] {
+    const dateRange: Date[] = [];
     let currentDate = new Date(startDate);
-    const formattedEndDate = this.formatDate(endDate);
+    
+    while (currentDate <= endDate) {
+      const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+      dateRange.push(lastDayOfMonth);
+      currentDate.setMonth(currentDate.getMonth() + 1); // Move to the next month
+      currentDate.setDate(1); // Set the day to the first day of the next month
+    }
+    
+    return dateRange;
+  }
+
+  getDateRange(startDate: Date, endDate: Date): Date[] {
+    const dateRange: Date[] = [];
+    let currentDate = new Date(startDate);
   
     while (currentDate <= endDate) {
-      const formattedDate = this.formatDate(currentDate);
-  
-      this.currencyService.getHistoricalData(formattedDate, baseCurrency, symbols)
-        .subscribe((response: any) => {
-          if (response.success) {
-            const rate = response.rates['USD'];
-            const historicalRate = {
-              name: formattedDate,
-              value: rate
-            };            
-            this.historicalData.push(historicalRate);
-            console.log(this.historicalData);
-          } else {
-            console.error('Error fetching historical data:', response.error);
-          }
-        });
-  
+      dateRange.push(new Date(currentDate));
       currentDate.setDate(currentDate.getDate() + 1);
     }
+  
+    return dateRange;
   }
-  formatXAxisTick(date: any): string {
-    if (date) {
-      const pipe = new DatePipe('en-US');
-      return pipe.transform(date, 'MMM dd') || '';
+  
+  formatDate(date: Date): string {
+    const year = date.getFullYear().toString();
+    let month = (date.getMonth() + 1).toString();
+    let day = date.getDate().toString();
+  
+    if (month.length < 2) {
+      month = '0' + month;
     }
-    return '';
-  }
-  private formatDate(date: Date): string {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
+  
+    if (day.length < 2) {
+      day = '0' + day;
+    }
   
     return `${year}-${month}-${day}`;
   }

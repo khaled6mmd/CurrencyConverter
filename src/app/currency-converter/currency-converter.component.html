@@ -1,4 +1,5 @@
-<div class="currency-converter mx-3 mt-3" [formGroup]="conversionForm">
+<div class="container">
+<div class="currency-converter bg-light pt-3" [formGroup]="conversionForm">
   <div class="row">
     <div class="col-md-4">
       <div class="form-group">
@@ -11,13 +12,13 @@
         <div class="col-5">
           <div class="form-group">
             <label for="fromCurrencySelect">From:</label>
-            <select class="form-control" id="fromCurrencySelect" formControlName="fromCurrency" [attr.disabled]="!conversionForm.valid ? '' : null">
+            <select class="form-control" id="fromCurrencySelect" formControlName="fromCurrency" [attr.disabled]="!conversionForm.valid || isFromCurrencyDisabled ? '' : null" [style.pointer-events]="(!conversionForm.valid || isFromCurrencyDisabled) ? 'none' : 'auto'">
               <option *ngFor="let currency of currencies" [value]="currency">{{ currency }}</option>
             </select>
           </div>
         </div>
         <div class="col-2 d-flex align-items-center justify-content-center mt-4">
-          <button class="btn btn-primary" (click)="swapCurrencies()" [disabled]="!conversionForm.valid">
+          <button class="btn btn-primary" (click)="swapCurrencies()" [disabled]="!conversionForm.valid || this.isFromCurrencyDisabled">
             <i class="fa fa-exchange-alt"></i>
           </button>
         </div>
@@ -45,9 +46,10 @@
           </div>
         </div>
         <div class="col-4 d-flex align-items-center justify-content-end">
-          <button [disabled]="!conversionForm.valid" (click)="redirectToDetailsPage()" class="btn btn-primary btn-details">More Details</button>
+          <button [disabled]="!conversionForm.valid" (click)="redirectToDetailsPage()" [hidden]="isMoreDetailHidden" class="btn btn-primary btn-details">More Details</button>
         </div>
       </div>
     </div>
   </div>
+</div>
 </div>

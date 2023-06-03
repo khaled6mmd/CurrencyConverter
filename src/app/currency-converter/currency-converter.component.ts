@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -11,6 +11,11 @@ import { CurrencyService } from 'src/app/services/currency.service';
 })
 export class CurrencyConverterComponent implements OnInit, OnDestroy {
   conversionForm: FormGroup;
+  @Input() fromCurrency: string | null = 'USD';
+  @Input() toCurrency: string | null = 'EUR'; 
+  @Input() amount: number = 1;
+  @Input() isFromCurrencyDisabled: boolean = false;
+  @Input() isMoreDetailHidden: boolean = false;
 
   convertedAmount: number;
   currencies: string[] = []; // Updated with the available currencies
@@ -22,9 +27,9 @@ export class CurrencyConverterComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.conversionForm = this.formBuilder.group({
-      amount: [1, [Validators.required, Validators.min(0)]], // Set default amount to 1
-      fromCurrency: ['EUR', Validators.required], // Set default 'from' currency to EUR
-      toCurrency: ['USD', Validators.required], // Set default 'to' currency to USD
+      amount: [this.amount, [Validators.required, Validators.min(0)]], // Set default amount to 1
+      fromCurrency: [this.fromCurrency, Validators.required], // Set default 'from' currency to EUR
+      toCurrency: [this.toCurrency, Validators.required], // Set default 'to' currency to USD
     });
 
     this.subscriptions.push(
@@ -42,7 +47,7 @@ export class CurrencyConverterComponent implements OnInit, OnDestroy {
   convert(): void {
     const { amount, fromCurrency, toCurrency } = this.conversionForm.value;
     this.subscriptions.push(
-      this.currencyService.getExchangeRates(fromCurrency).subscribe(rates => {
+      this.currencyService.getExchangeRates('EUR').subscribe(rates => {
         this.exchangeRates = rates;
         if (amount && fromCurrency && toCurrency) {
           const fromRate = this.exchangeRates[fromCurrency];
@@ -58,9 +63,15 @@ export class CurrencyConverterComponent implements OnInit, OnDestroy {
         }
       })
     );
-  }
+    this.router.navigate([], {
+      queryParams: { from: fromCurrency, to: toCurrency },
+      queryParamsHandling: 'merge'
+    });  }
 
   swapCurrencies(): void {
+    if (this.isFromCurrencyDisabled) {
+      return;
+    }
     const { fromCurrency, toCurrency } = this.conversionForm.value;
     this.conversionForm.patchValue({
       fromCurrency: toCurrency,

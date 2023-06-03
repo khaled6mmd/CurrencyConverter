@@ -15,6 +15,7 @@ import { HeaderComponent } from './header/header.component';
 import { CurrencyPanelCardComponent } from './converter-panel/currency-panel-card/currency-panel-card.component';
 import { HttpClientModule } from '@angular/common/http';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
+import { NgApexchartsModule } from 'ng-apexcharts';
 
 @NgModule({
   declarations: [
@@ -35,6 +36,7 @@ import { NgxChartsModule } from '@swimlane/ngx-charts';
     HttpClientModule,
     ReactiveFormsModule,
     NgxChartsModule,
+    NgApexchartsModule
     
   ],
   providers: [],
