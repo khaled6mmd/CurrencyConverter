@@ -1,0 +1,26 @@
+<div class="container mt-4">
+    <h2>Details</h2>
+    <p>Currency: {{ toCurrencyFullName }}</p>  
+    <div class="mt-4">
+      <h3>Chart</h3>
+      <div class="currency-details">
+        <h2>{{ fromCurrency }} to {{ toCurrency }}</h2>
+        <div>
+          <ngx-charts-line-chart
+          [scheme]="colorScheme"
+          [results]="historicalData"
+          [xAxis]="true"
+          [yAxis]="true"
+          [legend]="true"
+          [showXAxisLabel]="true"
+          [showYAxisLabel]="true"
+          xAxisLabel="Date"
+          yAxisLabel="Value"
+        >
+        </ngx-charts-line-chart>
+        
+        </div>
+      </div>
+    </div>
+  </div>
+  

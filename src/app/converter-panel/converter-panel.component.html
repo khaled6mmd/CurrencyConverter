@@ -1,0 +1,12 @@
+<div class="converter-panel d-flex justify-content-center mt-4 mx-1">
+    <div class="row w-100">
+      <div class="col-md-4" *ngFor="let currency of popularCurrencies">
+        <div class="card mb-3">
+          <div class="card-body text-center">
+            <app-currency-panel-card *ngIf="latestConversionData" [currency]="currency" [convertedCurrency]="convertAmountToCurrency(currency)"></app-currency-panel-card>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
