@@ -26,11 +26,6 @@ export class CurrencyConverterComponent implements OnInit, OnDestroy {
   constructor(private currencyService: CurrencyService, private formBuilder: FormBuilder, private router: Router, private route: ActivatedRoute) {}
 
   ngOnInit(): void {
-    this.route.queryParamMap.subscribe(params => {
-      if ( params.get('from') && params.get('to')) {
-        this.fromCurrency = params.get('from');
-        this.toCurrency = params.get('to');
-      }
       this.conversionForm = this.formBuilder.group({
         amount: [this.amount, [Validators.required, Validators.min(0)]], // Set default amount to 1
         fromCurrency: [this.fromCurrency, Validators.required], // Set default 'from' currency to EUR
@@ -43,7 +38,6 @@ export class CurrencyConverterComponent implements OnInit, OnDestroy {
         })
       );
       this.convert();
-    })
   }
 
   ngOnDestroy(): void {
