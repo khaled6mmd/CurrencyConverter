@@ -9,7 +9,6 @@ import { AppComponent } from './app.component';
 import { HomeComponent } from './home/home.component';
 import { CurrencyConverterComponent } from './currency-converter/currency-converter.component';
 import { CurrencyDetailsComponent } from './currency-details/currency-details.component';
-import { ChartComponent } from './chart/chart.component';
 import { ConverterPanelComponent } from './converter-panel/converter-panel.component';
 import { HeaderComponent } from './header/header.component';
 import { CurrencyPanelCardComponent } from './converter-panel/currency-panel-card/currency-panel-card.component';
@@ -23,7 +22,6 @@ import { NgApexchartsModule } from 'ng-apexcharts';
     HomeComponent,
     CurrencyConverterComponent,
     CurrencyDetailsComponent,
-    ChartComponent,
     ConverterPanelComponent,
     HeaderComponent,
     CurrencyPanelCardComponent
