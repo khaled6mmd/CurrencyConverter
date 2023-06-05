@@ -38,7 +38,7 @@ export class CurrencyService {
 
   getCurrencyFullName(currency: string): Observable<string> {
     const symbolsUrl = `${this.apiUrl}/symbols?access_key=${this.accessKey}`;
-    return this.http.get<any>(symbolsUrl).pipe(
+    return this.http.get<{ symbols: Record<string, string> }>(symbolsUrl).pipe(
       map(response => {
         const symbols = response.symbols;
         if (symbols && symbols[currency]) {
@@ -48,10 +48,9 @@ export class CurrencyService {
       })
     );
   }
-
-  getHistoricalData(date: string, baseCurrency: string, symbols: string[] = []): Observable<any> {
-    const url = `${this.apiUrl}/${date}?access_key=${this.accessKey}&base=${baseCurrency}&symbols=${symbols.join(',')}`;
-    return this.http.get(url);
-  }
   
+  getHistoricalData(date: string, baseCurrency: string, symbols: string[] = []): Observable<{ rates: Record<string, number> }> {
+    const url = `${this.apiUrl}/${date}?access_key=${this.accessKey}&base=${baseCurrency}&symbols=${symbols.join(',')}`;
+    return this.http.get<{ rates: Record<string, number> }>(url);
+  }  
 }
