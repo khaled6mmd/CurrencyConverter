@@ -1,6 +1,6 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { CurrencyService } from 'src/app/services/currency.service';
 
@@ -23,21 +23,27 @@ export class CurrencyConverterComponent implements OnInit, OnDestroy {
   currentCurrency: string;
   private subscriptions: Subscription[] = [];
 
-  constructor(private currencyService: CurrencyService, private formBuilder: FormBuilder, private router: Router) {}
+  constructor(private currencyService: CurrencyService, private formBuilder: FormBuilder, private router: Router, private route: ActivatedRoute) {}
 
   ngOnInit(): void {
-    this.conversionForm = this.formBuilder.group({
-      amount: [this.amount, [Validators.required, Validators.min(0)]], // Set default amount to 1
-      fromCurrency: [this.fromCurrency, Validators.required], // Set default 'from' currency to EUR
-      toCurrency: [this.toCurrency, Validators.required], // Set default 'to' currency to USD
-    });
+    this.route.queryParamMap.subscribe(params => {
+      if ( params.get('from') && params.get('to')) {
+        this.fromCurrency = params.get('from');
+        this.toCurrency = params.get('to');
+      }
+      this.conversionForm = this.formBuilder.group({
+        amount: [this.amount, [Validators.required, Validators.min(0)]], // Set default amount to 1
+        fromCurrency: [this.fromCurrency, Validators.required], // Set default 'from' currency to EUR
+        toCurrency: [this.toCurrency, Validators.required], // Set default 'to' currency to USD
+      });
 
-    this.subscriptions.push(
-      this.currencyService.getAvailableCurrencies().subscribe(currencies => {
-        this.currencies = currencies;
-      })
-    );
-    this.convert();
+      this.subscriptions.push(
+        this.currencyService.getAvailableCurrencies().subscribe(currencies => {
+          this.currencies = currencies;
+        })
+      );
+      this.convert();
+    })
   }
 
   ngOnDestroy(): void {
@@ -66,7 +72,8 @@ export class CurrencyConverterComponent implements OnInit, OnDestroy {
     this.router.navigate([], {
       queryParams: { from: fromCurrency, to: toCurrency },
       queryParamsHandling: 'merge'
-    });  }
+    }); 
+  }
 
   swapCurrencies(): void {
     if (this.isFromCurrencyDisabled) {

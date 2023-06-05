@@ -3,7 +3,7 @@
   <div class="container mb-2">
     <div class="d-flex justify-content-between align-items-center">
       <h3 class="currency-info">{{ toCurrencyFullName }}</h3>
-      <button class="btn btn-primary" routerLink="/home">Back To Home</button>
+      <button class="btn btn-primary" [routerLink]="['/home', 'converter-panel']" [queryParams]="{ from: fromCurrency, to: toCurrency }">Back To Home</button>
     </div>
   </div>
   <app-currency-converter [fromCurrency]="fromCurrency" [isMoreDetailHidden]="true" [isFromCurrencyDisabled]="true" [toCurrency]="toCurrency"></app-currency-converter>
@@ -13,7 +13,6 @@
     <h5 class="">Historical Chart</h5>
       <div *ngIf="historicalData.length > 0" class="chart-container">
         <ngx-charts-line-chart
-          [scheme]="colorScheme"
           [results]="historicalData"
           [xAxis]="true"
           [yAxis]="true"
