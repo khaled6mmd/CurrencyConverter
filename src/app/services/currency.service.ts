@@ -11,7 +11,7 @@ import { ExchangeRateResponse } from '../models/exchange-rate-response';
 })
 export class CurrencyService {
   private apiUrl = 'http://data.fixer.io/api';
-  private accessKey = 'cf35378d738da73c99bb0ddd37bad5ab'; // replace this with your key
+  private accessKey = '744fb778b0bfa68117fd0e13bf1e779a'; // replace this with your key
   private latestConversionData: Subject<ConversionData | null> = new Subject<ConversionData | null>;
 
   constructor(private http: HttpClient) {}

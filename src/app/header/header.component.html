@@ -4,10 +4,10 @@
       <div class="collapse navbar-collapse justify-content-end">
         <ul class="navbar-nav">
           <li class="nav-item">
-            <a class="nav-link" routerLink="/eur-usd-details">EUR-USD Details</a>
+            <a class="nav-link" [routerLink]="['/home/details']" [queryParams]="{from: 'EUR', to: 'USD'}">EUR-USD Details</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" routerLink="/eur-gbp-details">EUR-GBP Details</a>
+            <a class="nav-link" [routerLink]="['/home/details']" [queryParams]="{from: 'EUR', to: 'GBP'}">EUR-GBP Details</a>
           </li>
         </ul>
       </div>
